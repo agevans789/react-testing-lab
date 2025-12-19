@@ -24,8 +24,9 @@ function AccountContainer() {
       body: JSON.stringify(newTransaction)
     })
     .then(r=>r.json())
-    .then(data=>setTransactions([...transactions,data]))
-  }
+    .then(data=>setTransactions(prevTransactions => [...prevTransactions,data]));
+    console.log("New transaction received in handler:", newTransaction);
+  };
   
   // Sort function here
   function onSort(sortBy){
