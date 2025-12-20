@@ -1,7 +1,6 @@
-import { afterEach } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import fetch from 'node-fetch';
 
     global.transactions = [
     {
@@ -89,22 +88,26 @@ import fetch from 'node-fetch';
       "amount": -975
     }
 ];
-
-global.setFetchResponse = (val) => {
-    vi.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        json: () => {
-            console.log('Mock fetch is returning this data:', data);
-            return Promise.resolve(data)
-        }
-    })
-    global.fetch = vi.fn(() => Promise.resolve({
+// initialize fetch globally
+global.fetch = vi.fn(() => Promise.resolve({
         json: () => Promise.resolve(val),
         ok: true,
         status: 200
-    }))
-}
+    }));
+// define global helper
+global.setFetchResponse = (val) => {
+    vi.spyOn(global, 'fetch').mockImplementation(() => {
+        return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => {
+                return Promise.resolve(val);
+            }
+        })
+    })};
 
 afterEach(() => {
     cleanup();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
 })

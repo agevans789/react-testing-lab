@@ -34,6 +34,9 @@ function AccountContainer() {
   }
 
   // Filter using search here and pass new variable down
+  const displayedTransactions = transactions.filter((transaction) => {
+    return (transaction.description || "").toLowerCase().includes(search.toLowerCase());
+  })
   
 
   return (
@@ -41,7 +44,7 @@ function AccountContainer() {
       <Search setSearch={setSearch}/>
       <AddTransactionForm postTransaction={postTransaction}/>
       <Sort onSort={onSort}/>
-      <TransactionsList transactions={transactions} />
+      <TransactionsList transactions={displayedTransactions} />
     </div>
   );
 }

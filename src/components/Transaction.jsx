@@ -5,7 +5,7 @@ function Transaction({transaction}) {
     return null;
   }
   return (
-    <tr data-testid='transaction'>
+    <tr data-testid="transaction">
       <td data-testid='transaction-date'>{transaction.date}</td>
       <td data-testid='transaction-description'>{transaction.description}</td>
       <td data-testid='transaction-category'>{transaction.category}</td>

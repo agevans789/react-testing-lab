@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 function AddTransactionForm({postTransaction}) {
   // initialize state for form data
-  const [formData, setFromData] = useState({
+  const [formData, setFormData] = useState({
     date: "",
     description: "",
     category: "",
@@ -11,7 +11,7 @@ function AddTransactionForm({postTransaction}) {
   // update state on every input change 
   function handleChange(e) {
     const {name, value} = e.target;
-    setFromData(prevData => ({
+    setFormData(prevData => ({
       ...prevData,
       [name]: value
     }))
@@ -23,12 +23,12 @@ function AddTransactionForm({postTransaction}) {
 
   return (
     <div className="ui segment">
-      <form className="ui form" data-testid="add-transaction-form" onSubmit={(e)=>{submitForm(e)}}>
+      <form className="ui form" data-testid="add-transaction-form" onSubmit={submitForm}>
         <div className="inline fields">
-          <input type="date" name="date" placeholder="Date"/>
-          <input type="text" name="description" placeholder="Description" />
-          <input type="text" name="category" placeholder="Category" />
-          <input type="number" name="amount" placeholder="Amount" step="0.01" />
+          <input type="date" name="date" value={formData.date} placeholder="Date" onChange={handleChange}/>
+          <input type="text" name="description" value={formData.description} placeholder="Description" onChange={handleChange}/>
+          <input type="text" name="category" value={formData.category} placeholder="Category" onChange={handleChange}/>
+          <input type="number" name="amount" value={formData.amount} placeholder="Amount" step="0.01" onChange={handleChange}/>
         </div>
         <button className="ui button" type="submit" aria-label="button">
           Add Transaction

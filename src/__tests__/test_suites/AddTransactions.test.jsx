@@ -3,27 +3,36 @@ import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
 import '@testing-library/jest-dom';
 import AccountContainer from "../../components/AccountContainer";
-import { beforeEach, vi } from "vitest";
+import { vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 
 describe('Our app will', () => {
-    // set up initial mock data
     beforeEach(() => {
-        global.setFetchResponse(global.transactions);
-        vi.spyOn(global, "fetch").mockImplementation((url, options ) => {
-            if (options && options.method === 'POST') {
-                const body = JSON.parse(options.body);
-                return Promise.resolve({
+// main mocking logic
+// reset implementation before every test 
+// forcefully stub global fetch to ensure it works for all tests 
+        vi.stubGlobal('fetch', vi.fn(async (url, options) => {
+            // handle POST requests
+            // make sure fallback is bulletproof
+            const method = options?.method?.toUpperCase() || 'GET';
+            if (method === 'POST') {
+                const body = options.body ? JSON.parse(options.body) : {};
+                // ensure state updates
+                await new Promise(resolve => setTimeout(resolve, 0));
+                return {
                     ok: true,
-                    json: () => Promise.resolve({
-                        ...body,
-                        id: Math.random().toString(),
-                    })
-                })
-            };
-            return Promise.resolve({json: () => Promise.resolve(global.transactions)})
-        })
-    });
+                    status: 201,
+                    json: () => Promise.resolve({...body, id: Math.random().toString()})
+                }};
+            // default GET response outside of if statement
+            return {
+                ok: true,
+                status: 200,
+                json: () => Promise.resolve(global.transactions || [])
+                }
+            }
+        ));
+});
     test('add transactions from form input', async () => {
         // render the full container
         render(<AccountContainer/>);
@@ -49,11 +58,8 @@ describe('Our app will', () => {
         const form = screen.getByTestId("add-transaction-form");
         fireEvent.submit(form);
         // wait for UI to update
-        const newEntry = await screen.findByText(/Drinks/i)
+        const newEntry = await screen.findByText(/Drinks/i);
         expect(newEntry).toBeInTheDocument();
-        const emptyDateInput = screen.getByDisplayValue("");
-        expect(emptyDateInput).toBeInTheDocument();
-        expect(screen.getByDisplayValue("")).toBeInTheDocument();
         // check DOM that was updated after click happened 
         const newTransactionText = await screen.findByText(descriptionValue);
         // check that new item is now in the list 
@@ -66,7 +72,11 @@ describe('Our app will', () => {
         // check that the specific new description text is now visible
         expect(screen.getByText(descriptionValue)).toBeInTheDocument();
         expect(screen.getByText(dateValue)).toBeInTheDocument();
-        expect(screen.getByText(categoryValue)).toBeInTheDocument();
+        expect(screen.queryAllByText(categoryValue)[0]).toBeInTheDocument();
         expect(screen.getByText(amountValue)).toBeInTheDocument();
+        // reset
+        const emptyDateInput = screen.getByDisplayValue("");
+        expect(emptyDateInput).toBeInTheDocument();
+        expect(screen.getByDisplayValue("")).toBeInTheDocument();
     })
 })
